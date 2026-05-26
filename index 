@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendas de Mesas – Festa Junina | Nilton Lins Japiim</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --azul:#1A3A8F; --azul-escuro:#0D2460; --amarelo:#F5C800; --vermelho:#C0392B; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Nunito',sans-serif;background:#F4F6FB;background-image:repeating-linear-gradient(45deg,transparent,transparent 30px,rgba(26,58,143,.03) 30px,rgba(26,58,143,.03) 60px);min-height:100vh;padding-bottom:60px}
+
+  .loading-overlay{position:fixed;inset:0;background:var(--azul-escuro);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .6s}
+  .loading-overlay.hide{opacity:0;pointer-events:none}
+  .loading-logo{width:100px;height:100px;border-radius:50%;border:4px solid var(--amarelo);overflow:hidden;background:#fff;margin-bottom:20px;box-shadow:0 0 0 8px rgba(245,200,0,.2)}
+  .loading-logo img{width:100%;height:100%;object-fit:cover}
+  .loading-txt{font-family:'Fredoka One',cursive;color:var(--amarelo);font-size:1.3rem;margin-bottom:16px}
+  .loading-bar{width:200px;height:6px;background:rgba(255,255,255,.15);border-radius:50px;overflow:hidden}
+  .loading-bar-fill{height:100%;background:var(--amarelo);border-radius:50px;animation:ldAnim 1.5s ease-in-out infinite}
+  @keyframes ldAnim{0%{width:0%}50%{width:80%}100%{width:100%}}
+
+  .bwrap{background:var(--azul-escuro);padding:10px 0 0;overflow:hidden}
+  .bflags{display:flex;flex-wrap:wrap;justify-content:center}
+  .flag{width:26px;height:36px;clip-path:polygon(0 0,100% 0,50% 100%);margin:0 2px;animation:bal 2.5s ease-in-out infinite;transform-origin:top center}
+  .flag:nth-child(odd){animation-delay:.3s}.flag:nth-child(3n){animation-delay:.7s}
+  @keyframes bal{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+  .fio{width:100%;height:4px;background:linear-gradient(90deg,transparent,#8B4513 10%,#8B4513 90%,transparent);margin-top:-2px}
+
+  .hero{background:linear-gradient(160deg,var(--azul-escuro),var(--azul) 60%,#1e4db7);padding:28px 20px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 15% 50%,rgba(245,200,0,.12),transparent 55%)}
+  .hero-in{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+  .logo-c{width:95px;height:95px;border-radius:50%;border:4px solid var(--amarelo);overflow:hidden;background:#fff;flex-shrink:0;box-shadow:0 0 0 6px rgba(245,200,0,.2),0 8px 32px rgba(0,0,0,.4);animation:pLogo 3s ease-in-out infinite}
+  @keyframes pLogo{0%,100%{box-shadow:0 0 0 6px rgba(245,200,0,.2),0 8px 32px rgba(0,0,0,.4)}50%{box-shadow:0 0 0 10px rgba(245,200,0,.35),0 8px 32px rgba(0,0,0,.4)}}
+  .logo-c img{width:100%;height:100%;object-fit:cover}
+  .hero h1{font-family:'Fredoka One',cursive;font-size:clamp(1.7rem,5vw,3rem);color:var(--amarelo);text-shadow:2px 2px 0 var(--azul-escuro);line-height:1.1}
+  .hero .esc{font-size:1rem;color:rgba(255,255,255,.9);font-weight:700;margin-top:5px}
+  .hero .uni{font-size:.8rem;color:var(--amarelo);font-weight:600;margin-top:3px;opacity:.85}
+  .realtime-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:6px 16px;margin-top:12px;font-size:.75rem;font-weight:700;color:rgba(255,255,255,.8)}
+  .dot-live{width:8px;height:8px;border-radius:50%;background:#2ECC71;animation:blink 1.5s ease-in-out infinite;flex-shrink:0}
+  @keyframes blink{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(46,204,113,.4)}50%{opacity:.6;box-shadow:0 0 0 5px rgba(46,204,113,0)}}
+
+  .stats{background:var(--azul-escuro);padding:16px 20px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;border-bottom:4px solid var(--amarelo)}
+  .sc{background:rgba(255,255,255,.07);border:2px solid;border-radius:14px;padding:11px 20px;text-align:center;min-width:115px;position:relative;overflow:hidden}
+  .sc::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+  .sc.tot{border-color:var(--amarelo)}.sc.tot::after{background:var(--amarelo)}
+  .sc.ven{border-color:#2ECC71}.sc.ven::after{background:#2ECC71}
+  .sc.liv{border-color:#5DADE2}.sc.liv::after{background:#5DADE2}
+  .sn{font-family:'Fredoka One',cursive;font-size:2.1rem;line-height:1}
+  .sn.bump{animation:bump .3s ease}
+  @keyframes bump{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+  .sc.tot .sn{color:var(--amarelo)}.sc.ven .sn{color:#2ECC71}.sc.liv .sn{color:#5DADE2}
+  .sl{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.55);margin-top:2px}
+
+  .pwrap{background:var(--azul-escuro);padding:0 20px 18px;max-width:700px;margin:0 auto}
+  .plbl{display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:6px;text-transform:uppercase}
+  .pbg{background:rgba(255,255,255,.1);border-radius:50px;height:20px;overflow:hidden;border:2px solid rgba(255,255,255,.08)}
+  .pfill{height:100%;border-radius:50px;background:linear-gradient(90deg,#27AE60,#2ECC71,var(--amarelo));transition:width 1s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:9px;min-width:28px}
+  .pfill.nova-venda{animation:barraGlow .8s ease-out}
+  @keyframes barraGlow{0%{filter:brightness(1)}30%{filter:brightness(1.5);box-shadow:0 0 18px rgba(245,200,0,.8)}100%{filter:brightness(1)}}
+  .ppct{font-size:.65rem;font-weight:800;color:#0D2460}
+
+  .admin-btn-wrap{text-align:center;margin:22px 0 0}
+  .admin-btn{background:transparent;border:2px dashed #ccc;color:#bbb;border-radius:10px;padding:8px 20px;font-size:.78rem;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;transition:all .2s}
+  .admin-btn:hover{border-color:var(--azul);color:var(--azul)}
+
+  .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center}
+  .modal-ov.show{display:flex}
+  .modal{background:#fff;border-radius:18px;padding:32px 28px;width:90%;max-width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal h2{font-family:'Fredoka One',cursive;color:var(--azul);font-size:1.5rem;margin-bottom:8px}
+  .modal p{color:#666;font-size:.88rem;margin-bottom:18px}
+  .modal input{width:100%;border:2px solid #dde3f0;border-radius:10px;padding:12px 16px;font-size:1.2rem;font-family:'Nunito',sans-serif;font-weight:700;text-align:center;letter-spacing:6px;outline:none;margin-bottom:12px;transition:border-color .2s}
+  .modal input:focus{border-color:var(--azul)}
+  .modal input.erro{border-color:var(--vermelho);animation:shake .3s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .msg-erro{color:var(--vermelho);font-size:.8rem;font-weight:700;margin-bottom:10px;display:none}
+  .modal-btns{display:flex;gap:10px}
+  .btn-entrar{flex:1;background:var(--azul);color:#fff;border:none;border-radius:10px;padding:12px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer}
+  .btn-cancelar{flex:1;background:#f0f0f0;color:#666;border:none;border-radius:10px;padding:12px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer}
+
+  .admin-panel{display:none;max-width:700px;margin:0 auto;padding:0 20px}
+  .admin-panel.visivel{display:block}
+  .admin-box{background:#fff;border-radius:18px;border:3px solid var(--azul);padding:24px;box-shadow:0 4px 24px rgba(26,58,143,.12);margin-top:24px}
+  .admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+  .admin-title{font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--azul)}
+  .btn-sair{background:#f0f0f0;color:#666;border:none;border-radius:8px;padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
+  .admin-sub{font-size:.85rem;color:#666;margin-bottom:18px}
+  .form-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px}
+  .fg{display:flex;flex-direction:column;gap:5px}
+  .fg label{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--azul)}
+  .fg select,.fg input{border:2px solid #dde3f0;border-radius:10px;padding:10px 14px;font-size:.95rem;font-family:'Nunito',sans-serif;font-weight:600;outline:none;transition:border-color .2s}
+  .fg select:focus,.fg input:focus{border-color:var(--azul)}
+  .fg select{min-width:130px}.fg input{min-width:200px}
+  .btn-add{background:var(--azul);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;height:44px;transition:background .2s}
+  .btn-add:hover{background:var(--azul-escuro)}
+  .btn-add:disabled{opacity:.5;cursor:not-allowed}
+  .btn-rem{background:var(--vermelho);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
+  .btn-rem:hover{background:#a93226}
+  .btn-rem:disabled{opacity:.5;cursor:not-allowed}
+
+  .vlista{margin-top:14px;max-height:230px;overflow-y:auto;border:2px solid #eef0f8;border-radius:12px}
+  .vlista table{width:100%;border-collapse:collapse}
+  .vlista th{background:var(--azul);color:#fff;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;padding:9px 14px;text-align:left;position:sticky;top:0}
+  .vlista td{padding:9px 14px;border-bottom:1px solid #eef0f8;font-size:.88rem;font-weight:600;color:#333}
+  .vlista tr:last-child td{border-bottom:none}
+  .vlista tr:nth-child(even) td{background:#f8f9fe}
+  .empty-msg{text-align:center;color:#aaa;font-size:.85rem;padding:20px;font-style:italic}
+
+  .grid-wrap{max-width:1100px;margin:24px auto 0;padding:0 20px}
+  .gtitle{font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--azul);text-align:center;margin-bottom:16px}
+  .gtitle span{color:var(--vermelho)}
+  .ngrid-fixed{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-bottom:6px;position:sticky;top:0;z-index:10;background:#F4F6FB;padding:6px 0 4px}
+  .ngrid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+  .nc{aspect-ratio:1;border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:1.2rem;transition:transform .2s,box-shadow .2s;border:3px solid transparent;position:relative;overflow:hidden;cursor:default}
+  .nc:hover{transform:scale(1.08)}
+  .nb{font-size:.58rem;font-family:'Nunito',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.3px;margin-top:2px}
+  .nc.disp{background:linear-gradient(145deg,#FFFEF0,#FFF8D6);border-color:rgba(245,200,0,.5);color:var(--azul);box-shadow:0 4px 12px rgba(26,58,143,.12)}
+  .nc.disp .nb{color:var(--azul);opacity:.7}
+  .nc.disp:hover{border-color:var(--amarelo);box-shadow:0 8px 24px rgba(245,200,0,.35)}
+  .nc.vend{background:linear-gradient(145deg,#0A3D20,#0D5229);border-color:#27AE60;color:#A9DFBF;box-shadow:0 4px 14px rgba(39,174,96,.25)}
+  .nc.vend .ntxt{color:#ABEBC6;opacity:.7}
+  .nc.vend .nb{color:#58D68D}
+  .nc.vend::before{content:'✓';position:absolute;top:4px;right:7px;font-size:.9rem;color:#58D68D;font-weight:900;font-family:sans-serif}
+  .nc.vend[data-nome]:hover::after{content:attr(data-nome);position:absolute;bottom:-34px;left:50%;transform:translateX(-50%);background:var(--azul-escuro);color:var(--amarelo);font-size:.68rem;font-family:'Nunito',sans-serif;font-weight:700;padding:4px 10px;border-radius:8px;white-space:nowrap;z-index:10;border:1px solid rgba(245,200,0,.3);pointer-events:none}
+
+  .legenda{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin:22px auto 0;max-width:500px;background:rgba(26,58,143,.07);border:1px solid rgba(26,58,143,.12);border-radius:14px;padding:13px 20px}
+  .li{display:flex;align-items:center;gap:8px;font-size:.87rem;font-weight:700;color:var(--azul-escuro)}
+  .ld{width:20px;height:20px;border-radius:6px;border:2px solid}
+  .ld.d{background:#FFF8D6;border-color:var(--amarelo)}.ld.v{background:#0D5229;border-color:#27AE60}
+
+  .footer{text-align:center;padding:26px 20px 10px;font-size:.82rem;color:#555}
+  .footer .seal{display:block;margin-top:8px;font-family:'Fredoka One',cursive;font-size:.95rem;color:var(--azul)}
+
+  .contato-pix-section{max-width:900px;margin:32px auto 0;padding:0 20px}
+  .cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .cp-card{background:#fff;border-radius:18px;padding:22px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+  .cp-whats{border:3px solid #25D366;box-shadow:0 4px 20px rgba(37,211,102,.18)}
+  .cp-pix{border:3px solid #32BCAD;box-shadow:0 4px 20px rgba(50,188,173,.18)}
+  .cp-label{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#888}
+  .cp-title{font-family:'Fredoka One',cursive;font-size:1.35rem;color:var(--azul);line-height:1.1}
+  .cp-sub{font-size:.78rem;color:#666;font-weight:600;line-height:1.4;margin-top:-4px}
+  .cp-btn{width:100%;border:none;border-radius:12px;padding:13px 10px;font-family:'Fredoka One',cursive;font-size:.95rem;cursor:pointer;transition:transform .15s;text-decoration:none;display:block;margin-top:auto}
+  .cp-btn:hover{transform:scale(1.02)}.cp-btn:active{transform:scale(0.97)}
+  .cp-btn-green{background:#25D366;color:#fff}
+  .cp-btn-teal{background:#32BCAD;color:#fff}
+  .cp-btn-teal.copiado{background:#27AE60}
+  @media(max-width:520px){.cp-grid{grid-template-columns:1fr}}
+  .pix-obs{font-size:.78rem;color:#888;text-align:center;line-height:1.5;font-style:italic}
+
+  .cp-btn-teal,.cp-btn-green{position:relative;overflow:hidden;transition:background .3s,transform .1s}
+  .btn-ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,0.4);transform:scale(0);animation:rippleAnim 0.55s linear;pointer-events:none}
+  @keyframes rippleAnim{to{transform:scale(4);opacity:0}}
+  .cp-btn-teal.copiado{background:#27AE60}
+  .cp-btn-green.whats-ok{background:#128C7E}
+  .btn-check{display:inline-block;animation:checkPop .3s cubic-bezier(0.175,0.885,0.32,1.275)}
+  @keyframes checkPop{0%{transform:scale(0)}70%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+  .dance-stage{position:relative;height:80px;background:rgba(13,36,96,.6);border-radius:12px;overflow:hidden;margin:0 0 10px;max-width:700px;margin-left:auto;margin-right:auto}
+  .dance-floor{position:absolute;bottom:0;left:0;right:0;height:6px;background:linear-gradient(90deg,#8B4513,#A0522D,#8B4513)}
+  .dance-lights{position:absolute;top:0;left:0;right:0;height:5px}
+  .dance-light{position:absolute;top:0;width:6px;height:6px;border-radius:50%;animation:dLightBlink 1s ease-in-out infinite}
+  @keyframes dLightBlink{0%,100%{opacity:1}50%{opacity:.25}}
+  .dancer{position:absolute;bottom:6px;font-size:26px;transition:left .6s ease;animation:danceBase .6s ease-in-out infinite alternate}
+  .dancer.fast{animation:danceFast .3s ease-in-out infinite alternate}
+  @keyframes danceBase{0%{transform:translateY(0) rotate(-3deg)}100%{transform:translateY(-6px) rotate(3deg)}}
+  @keyframes danceFast{0%{transform:translateY(0) rotate(-6deg) scale(1)}100%{transform:translateY(-10px) rotate(6deg) scale(1.1)}}
+  .dance-note{position:absolute;font-size:13px;animation:floatNote 1.4s ease-out forwards;pointer-events:none}
+  @keyframes floatNote{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-45px)}}
+  .dance-confete{position:absolute;width:7px;height:7px;border-radius:2px;animation:confeteFall 1.2s ease-out forwards;pointer-events:none}
+  @keyframes confeteFall{0%{opacity:1;transform:translateY(-5px) rotate(0)}100%{opacity:0;transform:translateY(70px) rotate(360deg)}}
+
+  @media(max-width:600px){.ngrid{grid-template-columns:repeat(10,1fr);gap:3px}.ngrid-fixed{grid-template-columns:repeat(10,1fr);gap:3px}.nc{font-size:clamp(.65rem,2.5vw,.95rem)}.nc .nb{font-size:clamp(.38rem,1.4vw,.55rem);letter-spacing:0}.fg input{min-width:150px}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOv">
+  <div class="loading-logo"><img src="https://i.imgur.com/4M34hi2.png" alt="Nilton Lins" onerror="this.style.display='none'"></div>
+  <div class="loading-txt">Carregando vendas...</div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+</div>
+
+<div class="bwrap"><div class="bflags" id="flags"></div><div class="fio"></div></div>
+
+<div class="hero">
+  <div class="hero-in">
+    <div class="logo-c"><img src="https://i.imgur.com/4M34hi2.png" alt="Nilton Lins" onerror="this.style.background:'#1A3A8F'"></div>
+    <div>
+      <h1>🌽 FESTA JUNINA<br>Venda de Mesas</h1>
+      <p class="esc">Escolas Nilton Lins</p>
+      <p class="uni">📍 Unidade Japiim</p>
+      <div class="realtime-badge"><span class="dot-live"></span><span id="statusTxt">Carregando...</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="sc tot"><div class="sn">100</div><div class="sl">Total de Mesas</div></div>
+  <div class="sc ven"><div class="sn" id="qtdV">0</div><div class="sl">Mesas Vendidas</div></div>
+  <div class="sc liv"><div class="sn" id="qtdD">100</div><div class="sl">Disponíveis</div></div>
+</div>
+<div class="dance-stage" id="danceStage">
+  <div class="dance-lights" id="danceLights"></div>
+  <div class="dance-floor"></div>
+</div>
+<div class="pwrap">
+  <div class="plbl"><span>Progresso das vendas</span><span id="pctL">0% vendido</span></div>
+  <div class="pbg"><div class="pfill" id="pFill" style="width:0%"><span class="ppct" id="pNum">0%</span></div></div>
+</div>
+
+<div class="admin-btn-wrap">
+  <button class="admin-btn" onclick="abrirModal()">🔒 Área Restrita Financeiro</button>
+</div>
+
+<div class="modal-ov" id="modalOv">
+  <div class="modal">
+    <h2>🔐 Acesso Restrito</h2>
+    <p>Digite a senha para acessar o painel de edição</p>
+    <div class="msg-erro" id="msgErro">❌ Senha incorreta.</div>
+    <input type="password" id="inpSenha" placeholder="••••••" maxlength="30"
+      onkeydown="if(event.key==='Enter')verificarSenha()">
+    <div class="modal-btns">
+      <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-entrar" onclick="verificarSenha()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-box">
+    <div class="admin-header">
+      <div class="admin-title">✏️ Registrar Venda</div>
+      <button class="btn-sair" onclick="sairAdmin()">✕ Sair</button>
+    </div>
+    <div class="admin-sub">Escolha a mesa, digite o nome e clique em <strong>Adicionar</strong>. Salva automaticamente na nuvem! ☁️</div>
+    <div class="form-row">
+      <div class="fg"><label>Nº da Mesa</label><select id="selMesa"></select></div>
+      <div class="fg"><label>Nome do Comprador</label><input type="text" id="inpNome" placeholder="Ex: Família Silva" maxlength="40"></div>
+      <button class="btn-add" id="btnAdd" onclick="adicionarVenda()">+ Adicionar</button>
+    </div>
+    <div class="vlista">
+      <table>
+        <thead><tr><th>Mesa</th><th>Comprador</th><th>Remover</th></tr></thead>
+        <tbody id="tabelaVendas"><tr><td colspan="3" class="empty-msg">Nenhuma venda ainda.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="contato-pix-section">
+  <div class="cp-grid">
+    <div class="cp-card cp-whats">
+      <div class="cp-label">📲 Fale com o Financeiro</div>
+      <div class="cp-title">(92) 3215-3901</div>
+      <div class="cp-sub">WhatsApp ou presencialmente</div>
+      <a class="cp-btn cp-btn-green" href="https://wa.me/559232153901?text=Ol%C3%A1%2C+gostaria+de+adquirir+uma+mesa+para+a+Festa+Junina+da+Nilton+Lins!" target="_blank">
+        💬 Chamar no WhatsApp
+      </a>
+    </div>
+    <div class="cp-card cp-pix">
+      <div class="cp-label">💰 Pague com Pix</div>
+      <div class="cp-title">(92) 99459-4154</div>
+      <div class="cp-sub">Julio Cesar de Melo Correa Pinto<br><span style="font-size:.72rem">PagSeguro</span></div>
+      <button class="cp-btn cp-btn-teal" onclick="copiarChave()">
+        <span id="pixBtnTxt">📋 Copiar chave Pix</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="grid-wrap">
+  <p class="gtitle">🪑 Controle de <span>Mesas</span></p>
+  <div class="ngrid-fixed" id="gridFixed"></div><div class="ngrid" id="grid"></div>
+  <div class="legenda">
+    <div class="li"><div class="ld d"></div>Disponível para compra</div>
+    <div class="li"><div class="ld v"></div>Mesa já vendida ✓</div>
+  </div>
+</div>
+<div class="footer">
+  <span class="seal">Escolas Nilton Lins · Unidade Japiim · "Preparando para o Futuro"</span>
+</div>
+
+<script>
+  // ===== CONFIGURAÇÃO GOOGLE SHEETS =====
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz476eB4ZONtxZzKE5qEecYHcyT4jYbJcM7Aq8w7kAW4Qe-xHLlcK_tyjNSYm93E_l1/exec';
+  const SENHA = 'nilton2025';
+
+  // ===== DADOS INICIAIS DAS 38 MESAS JÁ VENDIDAS =====
+  // (carregados da planilha - serão sobrescritos pelos dados da nuvem)
+  const DADOS_INICIAIS = {
+    1: "ALINE - MARTIN CARDOSO CUMARU",
+    2: "FRANCÍETE - YUDI CORREA ISHIZAKI",
+    3: "FLAVIA - GUILHERME NATHAN DA MATA",
+    4: "CELINALDO - ISABELLA NINA TAVARES GOUVEIA",
+    5: "MAVILA - BRUNO GABRIEL",
+    6: "DULCINEIA - JOÃO LUCAS COSTA",
+    7: "MIRIAM - MARIA CLARA FONTANA",
+    8: "DANIELLE - MARIA FERNANDA DA CRUZ",
+    9: "JHENIFFER - KARYNNE CRUZ",
+    10: "JHENIFFER - KARYNNE CRUZ",
+    11: "ANTONIO - MARTIN CARDOSO CUMARU",
+    12: "GILDETE - CHIARA JÚLIA DA SILVA AMOEDO",
+    13: "OLYENNE - FLORA CORDEIRO ABRANTES",
+    14: "SHEILA - SÉRGIO DE PAULA E SILVA DOURARO",
+    15: "ALFREDO - ANA CECÍLIA DOS SANTOS SERRÃO",
+    16: "ALFREDO - ANA CECÍLIA DOS SANTOS SERRÃO",
+    17: "HELDER - HELOÁ CRISTINE CASTRO FREIRE",
+    18: "NUBIA - MYRELLA UCHOA",
+    19: "NUBIA - MYRELLA UCHOA",
+    20: "ULISSES - ALICE MARJORIE FERREIRA LIMA",
+    21: "GRACÍJANE - ÁDRYA LETÍCIA FERREIRA GARCIA",
+    22: "JAINA - IAN JAIME FEITOSA SOARES",
+    23: "JEANE - EMANUELLE VICTORIA BEZERRA DIAS",
+    24: "NATALIA - MARIA LETICIA SANTOS RIBEIRO",
+    25: "NATALIA - MARIA LETICIA SANTOS RIBEIRO",
+    26: "LUCIANA - SOPHIE GUIMARÃES VILLELA",
+    27: "RAFAEL - RAPHAELA DOS SANTOS SIQUEIRA",
+    28: "ROBERTO – RYAN ALBUQUERQUE PACHECO",
+    29: "JOSILENE - MATEUS DE SOUZA LIMA",
+    30: "KARLA - MARIAH CECILLIA RIBEIRO DA SILVA",
+    31: "VALCIRENE - ADONAI PINTO",
+    32: "TALITHA - ANALU FREITAS DE OLIVEIRA",
+    37: "DIEGO – ISABELLY DE SOUZA LOPES",
+    38: "KETLEN - ARIELLA NICOLE DA COSTA TARINI",
+    39: "KETLEN - ARIELLA NICOLE DA COSTA TARINI",
+    40: "MONIQUE - VITOR PIETRO SILVA DO AMARAL",
+    41: "MARILENA - REBECA RODRIGUES P. CASTELO",
+    50: "NAYANE - LUANY GABRIELLE BRITO ROCHA"
+  };
+
+  let vendas = {};
+  let salvando = false;
+  let dadosCarregados = false;
+
+  // Bandeirinhas
+  const cores=['#1A3A8F','#F5C800','#FFFFFF','#C0392B','#0D2460','#F5C800','#1A3A8F','#FFFFFF'];
+  const fc=document.getElementById('flags');
+  for(let i=0;i<60;i++){const b=document.createElement('div');b.className='flag';b.style.background=cores[i%cores.length];b.style.animationDelay=(i*0.07)+'s';fc.appendChild(b);}
+
+  // ===== CARREGAR DADOS DO GOOGLE SHEETS =====
+  async function carregarDados() {
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=get', { method: 'GET' });
+      const data = await res.json();
+      
+      if (data && data.mesas && Object.keys(data.mesas).length > 0) {
+        // Dados da nuvem encontrados — usar esses
+        vendas = {};
+        for (const [k, v] of Object.entries(data.mesas)) {
+          vendas[parseInt(k)] = v;
+        }
+        document.getElementById('statusTxt').textContent = 'Dados atualizados ✓';
+      } else {
+        // Nuvem vazia — usar dados iniciais e salvar na nuvem
+        vendas = { ...DADOS_INICIAIS };
+        document.getElementById('statusTxt').textContent = 'Inicializando dados...';
+        await salvarDados();
+        document.getElementById('statusTxt').textContent = 'Dados salvos na nuvem ✓';
+      }
+    } catch(e) {
+      // Erro de rede — usar dados iniciais localmente
+      console.warn('Erro ao carregar da nuvem, usando dados locais:', e);
+      vendas = { ...DADOS_INICIAIS };
+      document.getElementById('statusTxt').textContent = 'Modo offline ⚠️';
+    }
+    dadosCarregados = true;
+    renderTudo();
+    setTimeout(()=>document.getElementById('loadingOv').classList.add('hide'), 600);
+  }
+
+  // ===== SALVAR DADOS NO GOOGLE SHEETS =====
+  async function salvarDados() {
+    try {
+      const payload = { mesas: vendas };
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        mode: 'no-cors'
+      });
+    } catch(e) {
+      console.warn('Erro ao salvar:', e);
+    }
+  }
+
+  // Atualizar a cada 20 segundos
+  setInterval(async () => {
+    if(salvando || !dadosCarregados) return;
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=get', { method: 'GET' });
+      const data = await res.json();
+      if (data && data.mesas) {
+        const novas = {};
+        for (const [k, v] of Object.entries(data.mesas)) {
+          novas[parseInt(k)] = v;
+        }
+        const antes = JSON.stringify(vendas);
+        if(JSON.stringify(novas) !== antes) {
+          vendas = novas;
+          renderTudo();
+          document.getElementById('statusTxt').textContent = 'Atualizado agora ✓';
+        }
+      }
+    } catch(e) {}
+  }, 20000);
+
+  // Modal senha
+  function abrirModal() {
+    document.getElementById('modalOv').classList.add('show');
+    document.getElementById('inpSenha').value='';
+    document.getElementById('msgErro').style.display='none';
+    document.getElementById('inpSenha').classList.remove('erro');
+    setTimeout(()=>document.getElementById('inpSenha').focus(),100);
+  }
+  function fecharModal() { document.getElementById('modalOv').classList.remove('show'); }
+  function verificarSenha() {
+    if(document.getElementById('inpSenha').value === SENHA) {
+      fecharModal();
+      document.getElementById('adminPanel').classList.add('visivel');
+      setTimeout(()=>document.getElementById('adminPanel').scrollIntoView({behavior:'smooth'}),100);
+    } else {
+      const inp = document.getElementById('inpSenha');
+      inp.classList.add('erro');
+      document.getElementById('msgErro').style.display='block';
+      inp.value='';
+      setTimeout(()=>inp.classList.remove('erro'),400);
+    }
+  }
+  function sairAdmin() { document.getElementById('adminPanel').classList.remove('visivel'); }
+  document.getElementById('modalOv').addEventListener('click', e=>{ if(e.target===document.getElementById('modalOv')) fecharModal(); });
+
+  // Select de mesas disponíveis
+  function atualizarSelect() {
+    const sel=document.getElementById('selMesa'), val=sel.value;
+    sel.innerHTML='';
+    for(let n=1;n<=100;n++){
+      if(!vendas[n]){
+        const o=document.createElement('option');
+        o.value=n; o.textContent='Mesa '+String(n).padStart(2,'0');
+        sel.appendChild(o);
+      }
+    }
+    if(sel.querySelector('option[value="'+val+'"]')) sel.value=val;
+  }
+
+  // Adicionar venda
+  async function adicionarVenda() {
+    const num  = parseInt(document.getElementById('selMesa').value);
+    const nome = document.getElementById('inpNome').value.trim();
+    if(!num)  { alert('Selecione uma mesa!'); return; }
+    if(!nome) { alert('Digite o nome do comprador!'); return; }
+
+    salvando = true;
+    const btn = document.getElementById('btnAdd');
+    btn.disabled=true; btn.textContent='Salvando...';
+
+    vendas[num] = nome;
+    renderTudo();
+    document.getElementById('inpNome').value='';
+
+    try {
+      await salvarDados();
+      document.getElementById('statusTxt').textContent = 'Salvo na nuvem ✓';
+    } catch(e) {
+      alert('Erro ao salvar. Verifique sua conexão.');
+    }
+
+    btn.disabled=false; btn.textContent='+ Adicionar';
+    salvando = false;
+  }
+
+  // Remover venda
+  async function removerVenda(num) {
+    salvando = true;
+    document.querySelectorAll('.btn-rem').forEach(b=>b.disabled=true);
+
+    delete vendas[num];
+    renderTudo();
+
+    try {
+      await salvarDados();
+      document.getElementById('statusTxt').textContent = 'Salvo na nuvem ✓';
+    } catch(e) {
+      alert('Erro ao salvar. Verifique sua conexão.');
+    }
+    salvando = false;
+  }
+
+  function renderTudo() { renderTabela(); renderGrid(); renderStats(); atualizarSelect(); }
+
+  function renderTabela() {
+    const tb   = document.getElementById('tabelaVendas');
+    const nums = Object.keys(vendas).map(Number).sort((a,b)=>a-b);
+    if(!nums.length){ tb.innerHTML='<tr><td colspan="3" class="empty-msg">Nenhuma venda ainda.</td></tr>'; return; }
+    tb.innerHTML = nums.map(n=>`
+      <tr>
+        <td><strong>Mesa ${String(n).padStart(2,'0')}</strong></td>
+        <td>${vendas[n]}</td>
+        <td><button class="btn-rem" onclick="removerVenda(${n})">✕ Remover</button></td>
+      </tr>`).join('');
+  }
+
+  function renderGrid() {
+    const grid=document.getElementById('grid'); grid.innerHTML='';
+    for(let n=1;n<=100;n++){
+      const s=vendas[n], c=document.createElement('div');
+      c.className='nc '+(s?'vend':'disp');
+      if(s) c.setAttribute('data-nome',s);
+      c.innerHTML='<span class="ntxt">'+String(n).padStart(2,'0')+'</span><span class="nb">'+(s?'Vendida':'Livre')+'</span>';
+      grid.appendChild(c);
+    }
+  }
+
+  let _lastVendas=0;
+  function renderStats() {
+    const v=Object.keys(vendas).length, d=100-v;
+    const elV=document.getElementById('qtdV');
+    elV.textContent=v;
+    elV.classList.remove('bump'); void elV.offsetWidth; elV.classList.add('bump');
+    document.getElementById('qtdD').textContent=d;
+    document.getElementById('pctL').textContent=v+'% vendido';
+    document.getElementById('pNum').textContent=v+'%';
+    document.getElementById('pFill').style.width=v+'%';
+    const novoVenda = v > _lastVendas;
+    if(novoVenda){
+      const fill=document.getElementById('pFill');
+      const bg=document.querySelector('.pbg');
+      fill.classList.remove('nova-venda'); bg.classList.remove('nova-venda');
+      void fill.offsetWidth;
+      fill.classList.add('nova-venda'); bg.classList.add('nova-venda');
+      setTimeout(()=>{ fill.classList.remove('nova-venda'); bg.classList.remove('nova-venda'); }, 900);
+    }
+    if(typeof window.renderDance==='function') window.renderDance(v, novoVenda);
+    _lastVendas=v;
+  }
+
+  document.getElementById('inpNome').addEventListener('keydown', e=>{ if(e.key==='Enter') adicionarVenda(); });
+
+  function copiarChave(){
+    const btn=document.querySelector('.cp-btn-teal');
+    const txt=document.getElementById('pixBtnTxt');
+    const chave='92994594154';
+    function sucesso(){
+      btn.classList.add('copiado');
+      txt.innerHTML='<span class="btn-check">✓</span> Chave copiada!';
+      setTimeout(()=>{ btn.classList.remove('copiado'); txt.textContent='📋 Copiar chave Pix'; }, 3000);
+    }
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(chave).then(sucesso).catch(()=>fallback());
+    } else { fallback(); }
+    function fallback(){
+      const el=document.createElement('textarea');
+      el.value=chave; el.style.cssText='position:fixed;opacity:0;top:0;left:0';
+      document.body.appendChild(el); el.focus(); el.select();
+      try{ document.execCommand('copy'); sucesso(); } catch(e){ alert('Chave Pix: '+chave); }
+      document.body.removeChild(el);
+    }
+  }
+
+  function addRipple(e, btn){
+    const r=document.createElement('span'); r.className='btn-ripple';
+    const size=Math.max(btn.offsetWidth,btn.offsetHeight);
+    const rect=btn.getBoundingClientRect();
+    r.style.cssText='width:'+size+'px;height:'+size+'px;left:'+(e.clientX-rect.left-size/2)+'px;top:'+(e.clientY-rect.top-size/2)+'px';
+    btn.appendChild(r); setTimeout(()=>r.remove(),600);
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    const btnPix=document.querySelector('.cp-btn-teal');
+    if(btnPix) btnPix.addEventListener('click',e=>addRipple(e,btnPix));
+    const btnWpp=document.querySelector('.cp-btn-green');
+    if(btnWpp){
+      btnWpp.addEventListener('click',function(e){
+        addRipple(e,this);
+        const orig=this.innerHTML;
+        this.classList.add('whats-ok');
+        this.innerHTML='<span class="btn-check">✓</span> Abrindo WhatsApp...';
+        setTimeout(()=>{ this.classList.remove('whats-ok'); this.innerHTML=orig; },3000);
+      });
+    }
+  });
+
+  // ── PALCO DE DANÇA ──
+  (function(){
+    const cores=['#F5C800','#FF6B6B','#32BCAD','#FF69B4','#98FB98','#FFB347'];
+    const notas=['♪','♫','🎵','🎶'];
+    const stage=document.getElementById('danceStage');
+    const lightsEl=document.getElementById('danceLights');
+    for(let i=0;i<14;i++){
+      const l=document.createElement('div'); l.className='dance-light';
+      l.style.left=(i/13*94+3)+'%'; l.style.background=cores[i%cores.length];
+      l.style.animationDelay=(i*0.07)+'s'; lightsEl.appendChild(l);
+    }
+    function getDancers(p){
+      if(p<=0)  return [];
+      if(p<=15) return [{e:'🕺',x:48}];
+      if(p<=30) return [{e:'🕺',x:38},{e:'💃',x:55}];
+      if(p<=50) return [{e:'🕺',x:28},{e:'💃',x:44},{e:'🕺',x:60}];
+      if(p<=75) return [{e:'🕺',x:18},{e:'💃',x:33},{e:'🕺',x:49},{e:'💃',x:65}];
+      return [{e:'🕺',x:8},{e:'💃',x:22},{e:'🕺',x:37},{e:'💃',x:52},{e:'🕺',x:67},{e:'💃',x:82}];
+    }
+    let lastP=-1;
+    window.renderDance=function(p, novoVenda){
+      if(p===lastP && !novoVenda) return;
+      const prev=lastP; lastP=p;
+      stage.querySelectorAll('.dancer').forEach(d=>d.remove());
+      getDancers(p).forEach((d,i)=>{
+        const el=document.createElement('div');
+        el.className='dancer'+(p>=75?' fast':'');
+        el.textContent=d.e; el.style.left=d.x+'%'; el.style.animationDelay=(i*0.15)+'s';
+        stage.appendChild(el);
+      });
+      if(novoVenda && p>0){
+        const nota=document.createElement('div'); nota.className='dance-note';
+        nota.textContent=notas[Math.floor(Math.random()*notas.length)];
+        nota.style.left=(15+Math.random()*65)+'%'; nota.style.bottom='20px';
+        nota.style.color=cores[Math.floor(Math.random()*cores.length)];
+        stage.appendChild(nota); setTimeout(()=>nota.remove(),1500);
+        if(p%25===0||p===10||p===100){
+          for(let i=0;i<12;i++){
+            const cf=document.createElement('div'); cf.className='dance-confete';
+            cf.style.left=(5+Math.random()*88)+'%'; cf.style.top='8px';
+            cf.style.background=cores[Math.floor(Math.random()*cores.length)];
+            cf.style.animationDelay=(Math.random()*0.4)+'s';
+            stage.appendChild(cf); setTimeout(()=>cf.remove(),1400);
+          }
+        }
+      }
+    };
+    window.renderDance(0,false);
+  })();
+
+  // Iniciar
+  carregarDados();
+</script>
+
+</body>
+</html>
